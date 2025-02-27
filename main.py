@@ -8,6 +8,7 @@ from matplotlib import pyplot as plt
 import numpy as np
 import pickle
 from keras.src.regularizers import L2
+from tensorflow.keras.utils import plot_model
 
 batch_size = 128
 def visiual(generator):
@@ -26,6 +27,7 @@ def visiual(generator):
         axes[i].axis('off')
 
     plt.tight_layout()
+    plt.savefig('output.png')
     plt.show()
 
 
@@ -61,6 +63,8 @@ def main():
         shuffle=True,
         class_mode='categorical'
     )
+
+    visiual(train_generator)
 
     val_generator = val_datagen.flow_from_directory(
         val_path,  # 確保驗證集與測試集不同
@@ -102,6 +106,10 @@ def main():
     model = Model(inputs=base_model.input, outputs=output_layer)
 
     model.summary()
+    # plot_model(model, to_file='model_structure.png', show_shapes=True, show_layer_names=True)
+    plot_model(model, to_file='model_structure.png', show_shapes=False)
+    model_part = Model(inputs=model.input, outputs=model.layers[10].output)
+    plot_model(model_part, to_file='model_part.png', show_shapes=True)
     lr_callback = ReduceLROnPlateau(
         monitor='val_loss',
         factor=0.5,
