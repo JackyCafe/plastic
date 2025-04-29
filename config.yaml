@@ -1,5 +1,0 @@
-input_path: ./datasets/
-output_path: ./datasets/
-training_rate: 8
-val_rate: 1
-test_rate: 1

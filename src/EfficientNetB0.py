@@ -10,6 +10,9 @@ import pickle
 from keras.src.regularizers import L2
 from tensorflow.keras.utils import plot_model
 
+from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, precision_score, recall_score, f1_score, fbeta_score
+import seaborn as sns
+
 batch_size = 128
 def visiual(generator):
     batch_images, batch_labels = next(generator)
@@ -107,9 +110,9 @@ def main():
 
     model.summary()
     # plot_model(model, to_file='model_structure.png', show_shapes=True, show_layer_names=True)
-    plot_model(model, to_file='model_structure.png', show_shapes=False)
+
     model_part = Model(inputs=model.input, outputs=model.layers[10].output)
-    plot_model(model_part, to_file='model_part.png', show_shapes=True)
+    plot_model(model_part, to_file='./images/model_part.png', show_shapes=True)
     lr_callback = ReduceLROnPlateau(
         monitor='val_loss',
         factor=0.5,
@@ -130,9 +133,9 @@ def main():
     # 載入模型
 
     # 繼續進行推論或訓練
-
-    history = model.fit(train_generator, validation_data=val_generator, epochs=50, callbacks=[lr_callback,early_stop])
-    with open('history.pkl', 'wb') as f:
+    epochs = 50
+    history = model.fit(train_generator, validation_data=val_generator, epochs=epochs, callbacks=[lr_callback,early_stop])
+    with open('./models/history.pkl', 'wb') as f:
         pickle.dump(history.history, f)
     model.save_weights('efficientnetb1.weights.h5')
     model.save('efficientnetb1.h5')
@@ -156,6 +159,48 @@ def main():
 
     plt.show()
     plt.savefig('efficientnetb1.jpg')
+    # 進行測試資料的預測
+    print("\n--- 評估測試資料 ---")
+    test_steps = len(test_generator)
+    predictions = model.predict(test_generator, steps=test_steps)
+    predicted_classes = np.argmax(predictions, axis=1)
+    true_classes = test_generator.classes
+    class_labels = list(test_generator.class_indices.keys())
+
+    # 顯示分類報告
+    print("Classification Report:")
+    print(classification_report(true_classes, predicted_classes, target_names=class_labels))
+
+    # 計算混淆矩陣
+    cm = confusion_matrix(true_classes, predicted_classes)
+    plt.figure(figsize=(8, 6))
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues',
+                xticklabels=class_labels, yticklabels=class_labels)
+    plt.xlabel('Predicted Labels')
+    plt.ylabel('True Labels')
+    plt.title('Confusion Matrix')
+    plt.savefig('./images/efficient_b1_confusion_matrix.png')
+    plt.show()
+
+    # 計算 Accuracy
+    accuracy = accuracy_score(true_classes, predicted_classes)
+    print(f"Accuracy: {accuracy:.4f}")
+
+    # 計算 Precision
+    precision = precision_score(true_classes, predicted_classes, average='weighted')
+    print(f"Precision: {precision:.4f}")
+
+    # 計算 Recall
+    recall = recall_score(true_classes, predicted_classes, average='weighted')
+    print(f"Recall: {recall:.4f}")
+
+    # 計算 F1 Score
+    f1 = f1_score(true_classes, predicted_classes, average='weighted')
+    print(f"F1 Score: {f1:.4f}")
+
+    # 計算 F2 Score
+    f2 = fbeta_score(true_classes, predicted_classes, beta=2, average='weighted')
+    print(f"F2 Score: {f2:.4f}")
 
 
 

@@ -6,7 +6,7 @@ from matplotlib import pyplot as plt
 
 # model = load_model('model.h5')
 def loadmodel():
-    with open('history.pkl', 'rb') as f:
+    with open('../models/history.pkl', 'rb') as f:
         loaded_history = pickle.load(f)
 
     # 重新繪製 loss/accuracy 圖表

@@ -43,6 +43,8 @@ def prepare_data(config):
         for img in test_images:
             shutil.move(os.path.join(category_dir, img), os.path.join(output, 'test', category, img))
 
+        print("Total images: {} process done".format(total))
+
 
 
 def get_config(config):
@@ -51,7 +53,10 @@ def get_config(config):
 
 if __name__ == '__main__':
     """
+        指令yaml 檔
         將資料夾以config 中的比例分割為train, val, test 三個區塊
+        ex:
+        python prepare_data.py --config-file config.yaml
     
     """
     parser = ArgumentParser()
